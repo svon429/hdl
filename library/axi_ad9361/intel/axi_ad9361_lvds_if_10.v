@@ -244,15 +244,8 @@ module axi_ad9361_lvds_if_10 (
     .div_clk_export (clk),
     .data_s_export (4'b1010));
 
-  axi_ad9361_data_out i_enable (
-    .ck (clk),
-    .din ({tx_enable, tx_enable}),
-    .pad_out (enable));
-
-  axi_ad9361_data_out i_txnrx (
-    .ck (clk),
-    .din ({tx_txnrx, tx_txnrx}),
-    .pad_out (txnrx));
+    assign enable = tx_enable;
+    assign txnrx = tx_txnrx;
 
   axi_ad9361_serdes_clk i_clk (
     .rst_reset (pll_rst),

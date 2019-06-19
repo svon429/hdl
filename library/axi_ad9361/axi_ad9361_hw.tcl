@@ -173,7 +173,9 @@ proc axi_ad9361_elab {} {
   set m_fpga_technology [get_parameter_value "FPGA_TECHNOLOGY"]
   set m_cmos_or_lvds_n [get_parameter_value "CMOS_OR_LVDS_N"]
 
-  if {$m_fpga_technology eq "Arria 10"} {
+  if { $m_fpga_technology == 103 } {
+
+    send_message WARNING "\"ADD LVDS INTERFACE\""
 
     add_hdl_instance axi_ad9361_serdes_clk intel_serdes
     set_instance_parameter_value axi_ad9361_serdes_clk {DEVICE_FAMILY} $m_fpga_technology
