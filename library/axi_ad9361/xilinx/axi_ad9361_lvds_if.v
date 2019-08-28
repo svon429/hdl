@@ -41,7 +41,8 @@ module axi_ad9361_lvds_if #(
   parameter   DAC_IODELAY_ENABLE = 0,
   parameter   IO_DELAY_GROUP = "dev_if_delay_group",
   parameter   CLK_DESKEW = 0,
-  parameter   DELAY_REFCLK_FREQUENCY = 200) (
+  parameter   DELAY_REFCLK_FREQUENCY = 200,
+  parameter   RX_NODPA = 0) (
 
   // physical interface (receive)
 
