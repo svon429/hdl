@@ -37,21 +37,23 @@
 module axi_fan_control #(
   parameter     ID = 0,
   parameter     PWM_FREQUENCY_HZ  = 5000,
+  parameter     INTERNAL_SYSMONE  = 1,
 
   //temperature thresholds defined to match sysmon reg values
-  parameter     THRESH_PWM_000    = 16'h8f5e, //TEMP_05
-  parameter     THRESH_PWM_025_L  = 16'h96f0, //TEMP_20
-  parameter     THRESH_PWM_025_H  = 16'ha0ff, //TEMP_40
-  parameter     THRESH_PWM_050_L  = 16'hab03, //TEMP_60
-  parameter     THRESH_PWM_050_H  = 16'hb00a, //TEMP_70
-  parameter     THRESH_PWM_075_L  = 16'hb510, //TEMP_80
-  parameter     THRESH_PWM_075_H  = 16'hba17, //TEMP_90
-  parameter     THRESH_PWM_100    = 16'hbc9b) ( //TEMP_95
+  parameter     TEMP_0    = 05, //TEMP_05
+  parameter     TEMP_1    = 20, //TEMP_20
+  parameter     TEMP_2    = 40, //TEMP_40
+  parameter     TEMP_3    = 60, //TEMP_60
+  parameter     TEMP_4    = 70, //TEMP_70
+  parameter     TEMP_5    = 80, //TEMP_80
+  parameter     TEMP_6    = 90, //TEMP_90
+  parameter     TEMP_7    = 95) ( //TEMP_95
 
-    input         tacho,
-    output  reg   irq,
-    output        pwm,
-
+  input           [ 9:0]  temp_in,
+  input                   tacho,
+  output    reg           irq,
+  output                  pwm,
+    
   //axi interface
   input                   s_axi_aclk,
   input                   s_axi_aresetn,
@@ -83,9 +85,19 @@ localparam [31:0] CORE_MAGIC              = 32'h46414E43;    // FANC
 
 localparam        CLK_FREQUENCY           = 100000000;
 localparam        PWM_PERIOD              = CLK_FREQUENCY / PWM_FREQUENCY_HZ;
-localparam        OVERFLOW_LIM            = CLK_FREQUENCY * 5;
+localparam        OVERFLOW_LIM            = 1000;       
+//localparam        OVERFLOW_LIM            = CLK_FREQUENCY * 5;
 localparam        AVERAGE_DIV             = 128;
 
+localparam        THRESH_PWM_000          = (INTERNAL_SYSMONE == 1) ? (((TEMP_0+280.2308787)*65535)/509.3140064) : ((TEMP_0*41+11195)/20);
+localparam        THRESH_PWM_025_L        = (INTERNAL_SYSMONE == 1) ? (((TEMP_1+280.2308787)*65535)/509.3140064) : ((TEMP_1*41+11195)/20);
+localparam        THRESH_PWM_025_H        = (INTERNAL_SYSMONE == 1) ? (((TEMP_2+280.2308787)*65535)/509.3140064) : ((TEMP_2*41+11195)/20);
+localparam        THRESH_PWM_050_L        = (INTERNAL_SYSMONE == 1) ? (((TEMP_3+280.2308787)*65535)/509.3140064) : ((TEMP_3*41+11195)/20);
+localparam        THRESH_PWM_050_H        = (INTERNAL_SYSMONE == 1) ? (((TEMP_4+280.2308787)*65535)/509.3140064) : ((TEMP_4*41+11195)/20);
+localparam        THRESH_PWM_075_L        = (INTERNAL_SYSMONE == 1) ? (((TEMP_5+280.2308787)*65535)/509.3140064) : ((TEMP_5*41+11195)/20);
+localparam        THRESH_PWM_075_H        = (INTERNAL_SYSMONE == 1) ? (((TEMP_6+280.2308787)*65535)/509.3140064) : ((TEMP_6*41+11195)/20);
+localparam        THRESH_PWM_100          = (INTERNAL_SYSMONE == 1) ? (((TEMP_7+280.2308787)*65535)/509.3140064) : ((TEMP_7*41+11195)/20);
+ 
 //pwm params
 localparam        PWM_ONTIME_25           = PWM_PERIOD / 4;
 localparam        PWM_ONTIME_50           = PWM_PERIOD / 2;
@@ -144,6 +156,16 @@ reg           pulse_gen_load_config = 'h0;
 reg           tacho_meas_int = 'h0;
 
 reg   [31:0]  up_pwm_width = 'd0;
+
+reg   [31:0]  up_temp_00_h  = THRESH_PWM_000  ;
+reg   [31:0]  up_temp_25_l  = THRESH_PWM_025_L;
+reg   [31:0]  up_temp_25_h  = THRESH_PWM_025_H;
+reg   [31:0]  up_temp_50_l  = THRESH_PWM_050_L;
+reg   [31:0]  up_temp_50_h  = THRESH_PWM_050_H;
+reg   [31:0]  up_temp_75_l  = THRESH_PWM_075_L;
+reg   [31:0]  up_temp_75_h  = THRESH_PWM_075_H;
+reg   [31:0]  up_temp_100_l = THRESH_PWM_100  ;
+
 reg           up_wack = 'd0;
 reg   [31:0]  up_rdata = 'd0;
 reg           up_rack = 'd0;
@@ -386,19 +408,19 @@ always @(posedge up_clk)
       EVAL_TEMP : begin
          //pwm section
         //the pwm only has to be changed when passing through these temperature intervals
-        if (sysmone_temp < THRESH_PWM_000) begin
+        if (sysmone_temp < up_temp_00_h) begin
           //PWM DUTY should be 0%
           pwm_width_req <= 1'b0;
-        end else if ((sysmone_temp > THRESH_PWM_025_L) && (sysmone_temp < THRESH_PWM_025_H)) begin
+        end else if ((sysmone_temp > up_temp_25_l) && (sysmone_temp < up_temp_25_h)) begin
           //PWM DUTY should be 25%
           pwm_width_req <= PWM_ONTIME_25;
-        end else if ((sysmone_temp > THRESH_PWM_050_L) && (sysmone_temp < THRESH_PWM_050_H)) begin
+        end else if ((sysmone_temp > up_temp_50_l) && (sysmone_temp < up_temp_50_h)) begin
           //PWM DUTY should be 50%
           pwm_width_req <= PWM_ONTIME_50;
-        end else if ((sysmone_temp > THRESH_PWM_075_L) && (sysmone_temp < THRESH_PWM_075_H)) begin
+        end else if ((sysmone_temp > up_temp_75_l) && (sysmone_temp < up_temp_75_h)) begin
           //PWM DUTY should be 75%
           pwm_width_req <= PWM_ONTIME_75;
-        end else if (sysmone_temp > THRESH_PWM_100) begin
+        end else if (sysmone_temp > up_temp_100_l) begin
           //PWM DUTY should be 100%
           pwm_width_req <= PWM_PERIOD;
           //default to 100% duty cycle after reset if not within temperature intervals described above
@@ -482,6 +504,14 @@ always @(posedge up_clk) begin
     up_tacho_tol <= 'd0;
     up_tacho_en <= 'd0;
     up_scratch <= 'd0;
+    up_temp_00_h <= THRESH_PWM_000;
+    up_temp_25_l <= THRESH_PWM_025_L;
+    up_temp_25_h <= THRESH_PWM_025_H;
+    up_temp_50_l <= THRESH_PWM_050_L;
+    up_temp_50_h <= THRESH_PWM_050_H;
+    up_temp_75_l <= THRESH_PWM_075_L;
+    up_temp_75_h <= THRESH_PWM_075_H;
+    up_temp_100_l <= THRESH_PWM_100;
     up_irq_mask <= 4'b1111;
     up_resetn <= 1'd0;
   end else begin
@@ -505,6 +535,31 @@ always @(posedge up_clk) begin
     end else if (temp_increase_alarm) begin
       up_tacho_en <= 1'b0;
     end 
+    if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h40)) begin
+      up_temp_00_h <= up_wdata_s;
+//      up_tacho_en <= 1'b0;
+    end
+    if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h41)) begin
+      up_temp_25_l <= up_wdata_s;
+    end
+    if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h42)) begin
+      up_temp_25_h <= up_wdata_s;
+    end
+    if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h43)) begin
+      up_temp_50_l <= up_wdata_s;
+    end
+    if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h44)) begin
+     up_temp_50_h <= up_wdata_s;
+    end
+    if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h45)) begin
+      up_temp_75_l <= up_wdata_s;
+    end
+    if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h46)) begin
+      up_temp_75_h <= up_wdata_s;
+    end
+    if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h47)) begin
+      up_temp_100_l <= up_wdata_s;
+    end
     if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h10)) begin
       up_irq_mask <= up_wdata_s[3:0];
     end
@@ -524,16 +579,24 @@ always @(posedge up_clk) begin
         8'h01: up_rdata <= ID;
         8'h02: up_rdata <= up_scratch;
         8'h03: up_rdata <= CORE_MAGIC;
-        8'h20: up_rdata <= up_resetn;
-        8'h21: up_rdata <= pwm_width;
-        8'h30: up_rdata <= PWM_PERIOD;
-        8'h31: up_rdata <= up_tacho_avg_sum;
-        8'h32: up_rdata <= sysmone_temp;
-        8'h22: up_rdata <= up_tacho_val;
-        8'h23: up_rdata <= up_tacho_tol;
         8'h10: up_rdata <= up_irq_mask;
         8'h11: up_rdata <= up_irq_pending;
         8'h12: up_rdata <= up_irq_source;
+        8'h20: up_rdata <= up_resetn;
+        8'h21: up_rdata <= pwm_width;
+        8'h22: up_rdata <= up_tacho_val;
+        8'h23: up_rdata <= up_tacho_tol;
+        8'h30: up_rdata <= PWM_PERIOD;
+        8'h31: up_rdata <= up_tacho_avg_sum;
+        8'h32: up_rdata <= sysmone_temp;
+        8'h40: up_rdata <= up_temp_00_h;
+        8'h41: up_rdata <= up_temp_25_l;
+        8'h42: up_rdata <= up_temp_25_h;
+        8'h43: up_rdata <= up_temp_50_l;
+        8'h44: up_rdata <= up_temp_50_h;
+        8'h45: up_rdata <= up_temp_75_l;
+        8'h46: up_rdata <= up_temp_75_h;
+        8'h47: up_rdata <= up_temp_100_l;
         default: up_rdata <= 0;
       endcase
     end else begin
