@@ -85,7 +85,7 @@ localparam [31:0] CORE_MAGIC              = 32'h46414E43;    // FANC
 
 localparam        CLK_FREQUENCY           = 100000000;
 localparam        PWM_PERIOD              = CLK_FREQUENCY / PWM_FREQUENCY_HZ;
-localparam        OVERFLOW_LIM            = 1000;       
+localparam        OVERFLOW_LIM            = 200000;       
 //localparam        OVERFLOW_LIM            = CLK_FREQUENCY * 5;
 localparam        AVERAGE_DIV             = 128;
 
@@ -118,12 +118,13 @@ localparam        TACHO_T100_TOL          = TACHO_T100 * TACHO_TOL_PERCENT / 100
 localparam        INIT                    = 8'h00;
 localparam        DRP_WAIT_EOC            = 8'h01;
 localparam        DRP_WAIT_DRDY           = 8'h02;
-localparam        DRP_READ_TEMP           = 8'h03;
-localparam        DRP_READ_TEMP_WAIT_DRDY = 8'h04;
-localparam        GET_TACHO               = 8'h05;
-localparam        EVAL_TEMP               = 8'h06;
-localparam        SET_PWM                 = 8'h07;
-localparam        EVAL_TACHO              = 8'h08;
+localparam        DRP_WAIT_FSM_EN         = 8'h03;
+localparam        DRP_READ_TEMP           = 8'h04;
+localparam        DRP_READ_TEMP_WAIT_DRDY = 8'h05;
+localparam        GET_TACHO               = 8'h06;
+localparam        EVAL_TEMP               = 8'h07;
+localparam        SET_PWM                 = 8'h08;
+localparam        EVAL_TACHO              = 8'h09;
 
 reg   [31:0]  up_scratch = 'd0;
 reg   [7:0]   state = INIT;
@@ -155,6 +156,7 @@ reg           pwm_change_done = 1'b1;
 reg           pulse_gen_load_config = 'h0;
 reg           tacho_meas_int = 'h0;
 
+reg   [15:0]  presc_reg = 'h0;
 reg   [31:0]  up_pwm_width = 'd0;
 
 reg   [31:0]  up_temp_00_h  = THRESH_PWM_000  ;
@@ -235,66 +237,70 @@ i_up_axi (
   .up_rdata (up_rdata),
   .up_rack (up_rack));
 
-SYSMONE4 #(
-  .COMMON_N_SOURCE(16'hFFFF),
-  .INIT_40(16'h1000), // config reg 0
-  .INIT_41(16'h2F9F), // config reg 1
-  .INIT_42(16'h1400), // config reg 2
-  .INIT_43(16'h200F), // config reg 3
-  .INIT_44(16'h0000), // config reg 4
-  .INIT_45(16'hE200), // Analog Bus Register
-  .INIT_46(16'h0000), // Sequencer Channel selection (Vuser0-3)
-  .INIT_47(16'h0000), // Sequencer Average selection (Vuser0-3)
-  .INIT_48(16'h0101), // Sequencer channel selection
-  .INIT_49(16'h0000), // Sequencer channel selection
-  .INIT_4A(16'h0000), // Sequencer Average selection
-  .INIT_4B(16'h0000), // Sequencer Average selection
-  .INIT_4C(16'h0000), // Sequencer Bipolar selection
-  .INIT_4D(16'h0000), // Sequencer Bipolar selection
-  .INIT_4E(16'h0000), // Sequencer Acq time selection
-  .INIT_4F(16'h0000), // Sequencer Acq time selection
-  .INIT_50(16'hB794), // Temp alarm trigger
-  .INIT_51(16'h4E81), // Vccint upper alarm limit
-  .INIT_52(16'hA147), // Vccaux upper alarm limit
-  .INIT_53(16'hBF13), // Temp alarm OT upper
-  .INIT_54(16'hAB02), // Temp alarm reset
-  .INIT_55(16'h4963), // Vccint lower alarm limit
-  .INIT_56(16'h9555), // Vccaux lower alarm limit
-  .INIT_57(16'hB00A), // Temp alarm OT reset
-  .INIT_58(16'h4E81), // VCCBRAM upper alarm limit
-  .INIT_5C(16'h4963), // VCCBRAM lower alarm limit
-  .INIT_59(16'h4963), // vccpsintlp upper alarm limit
-  .INIT_5D(16'h451E), // vccpsintlp lower alarm limit
-  .INIT_5A(16'h4963), // vccpsintfp upper alarm limit
-  .INIT_5E(16'h451E), // vccpsintfp lower alarm limit
-  .INIT_5B(16'h9A74), // vccpsaux upper alarm limit
-  .INIT_5F(16'h91EB), // vccpsaux lower alarm limit
-  .INIT_60(16'h4D39), // Vuser0 upper alarm limit
-  .INIT_61(16'h4DA7), // Vuser1 upper alarm limit
-  .INIT_62(16'h9A74), // Vuser2 upper alarm limit
-  .INIT_63(16'h9A74), // Vuser3 upper alarm limit
-  .INIT_68(16'h4C5E), // Vuser0 lower alarm limit
-  .INIT_69(16'h4BF2), // Vuser1 lower alarm limit
-  .INIT_6A(16'h98BF), // Vuser2 lower alarm limit
-  .INIT_6B(16'h98BF), // Vuser3 lower alarm limit
-  .INIT_7A(16'h0000), // DUAL0 Register
-  .INIT_7B(16'h0000), // DUAL1 Register
-  .INIT_7C(16'h0000), // DUAL2 Register
-  .INIT_7D(16'h0000), // DUAL3 Register
-  .SIM_DEVICE("ZYNQ_ULTRASCALE"),
-  .SIM_MONITOR_FILE("design.txt"))
-inst_sysmon (
-  .DADDR(drp_daddr),
-  .DCLK(up_clk),
-  .DEN(drp_den_reg[0]),
-  .DI(drp_di),
-  .DWE(drp_dwe_reg[0]),
-  .RESET(!up_resetn),
-  .DO(drp_do),
-  .DRDY(drp_drdy),
-  .EOC(drp_eoc),
-  .EOS(drp_eos)
-);
+generate 
+if (INTERNAL_SYSMONE == 1) begin
+  SYSMONE4 #(
+    .COMMON_N_SOURCE(16'hFFFF),
+    .INIT_40(16'h1000), // config reg 0
+    .INIT_41(16'h2F9F), // config reg 1
+    .INIT_42(16'h1400), // config reg 2
+    .INIT_43(16'h200F), // config reg 3
+    .INIT_44(16'h0000), // config reg 4
+    .INIT_45(16'hE200), // Analog Bus Register
+    .INIT_46(16'h0000), // Sequencer Channel selection (Vuser0-3)
+    .INIT_47(16'h0000), // Sequencer Average selection (Vuser0-3)
+    .INIT_48(16'h0101), // Sequencer channel selection
+    .INIT_49(16'h0000), // Sequencer channel selection
+    .INIT_4A(16'h0000), // Sequencer Average selection
+    .INIT_4B(16'h0000), // Sequencer Average selection
+    .INIT_4C(16'h0000), // Sequencer Bipolar selection
+    .INIT_4D(16'h0000), // Sequencer Bipolar selection
+    .INIT_4E(16'h0000), // Sequencer Acq time selection
+    .INIT_4F(16'h0000), // Sequencer Acq time selection
+    .INIT_50(16'hB794), // Temp alarm trigger
+    .INIT_51(16'h4E81), // Vccint upper alarm limit
+    .INIT_52(16'hA147), // Vccaux upper alarm limit
+    .INIT_53(16'hBF13), // Temp alarm OT upper
+    .INIT_54(16'hAB02), // Temp alarm reset
+    .INIT_55(16'h4963), // Vccint lower alarm limit
+    .INIT_56(16'h9555), // Vccaux lower alarm limit
+    .INIT_57(16'hB00A), // Temp alarm OT reset
+    .INIT_58(16'h4E81), // VCCBRAM upper alarm limit
+    .INIT_5C(16'h4963), // VCCBRAM lower alarm limit
+    .INIT_59(16'h4963), // vccpsintlp upper alarm limit
+    .INIT_5D(16'h451E), // vccpsintlp lower alarm limit
+    .INIT_5A(16'h4963), // vccpsintfp upper alarm limit
+    .INIT_5E(16'h451E), // vccpsintfp lower alarm limit
+    .INIT_5B(16'h9A74), // vccpsaux upper alarm limit
+    .INIT_5F(16'h91EB), // vccpsaux lower alarm limit
+    .INIT_60(16'h4D39), // Vuser0 upper alarm limit
+    .INIT_61(16'h4DA7), // Vuser1 upper alarm limit
+    .INIT_62(16'h9A74), // Vuser2 upper alarm limit
+    .INIT_63(16'h9A74), // Vuser3 upper alarm limit
+    .INIT_68(16'h4C5E), // Vuser0 lower alarm limit
+    .INIT_69(16'h4BF2), // Vuser1 lower alarm limit
+    .INIT_6A(16'h98BF), // Vuser2 lower alarm limit
+    .INIT_6B(16'h98BF), // Vuser3 lower alarm limit
+    .INIT_7A(16'h0000), // DUAL0 Register
+    .INIT_7B(16'h0000), // DUAL1 Register
+    .INIT_7C(16'h0000), // DUAL2 Register
+    .INIT_7D(16'h0000), // DUAL3 Register
+    .SIM_DEVICE("ZYNQ_ULTRASCALE"),
+    .SIM_MONITOR_FILE("design.txt"))
+  inst_sysmon (
+    .DADDR(drp_daddr),
+    .DCLK(up_clk),
+    .DEN(drp_den_reg[0]),
+    .DI(drp_di),
+    .DWE(drp_dwe_reg[0]),
+    .RESET(!up_resetn),
+    .DO(drp_do),
+    .DRDY(drp_drdy),
+    .EOC(drp_eoc),
+    .EOS(drp_eos)
+  );
+end 
+endgenerate
 
 //pulse generator instance
 util_pulse_gen #(
@@ -332,12 +338,16 @@ always @(posedge up_clk)
     case (state)
 
       INIT : begin
-        drp_daddr <= 8'h40;
-        // performing read
-        drp_den_reg <= 2'h2;
-        if (drp_eoc == 1'b1) begin
-          state <= DRP_WAIT_EOC;
-        end
+        if (INTERNAL_SYSMONE == 1) begin
+          drp_daddr <= 8'h40;
+          // performing read
+          drp_den_reg <= 2'h2;
+          if (drp_eoc == 1'b1) begin
+            state <= DRP_WAIT_EOC;
+          end
+        end else begin
+          state <= DRP_READ_TEMP_WAIT_DRDY;
+        end  
       end
 
       DRP_WAIT_EOC : begin
@@ -364,6 +374,12 @@ always @(posedge up_clk)
         end
       end
 
+      DRP_WAIT_FSM_EN : begin
+        if (presc_reg[15] == 1'b1) begin
+          state <= DRP_READ_TEMP;
+        end
+      end
+      
       DRP_READ_TEMP : begin
         tacho_alarm <= 1'b0;
         tacho_meas_int <= 1'b0;
@@ -377,13 +393,18 @@ always @(posedge up_clk)
       end
 
       DRP_READ_TEMP_WAIT_DRDY : begin
-        if (drp_drdy == 1'b1) begin
-          sysmone_temp <= drp_do;
-          state <= GET_TACHO;
+        if (INTERNAL_SYSMONE == 1) begin
+          if (drp_drdy == 1'b1) begin
+            sysmone_temp <= drp_do;
+            state <= GET_TACHO;
+          end else begin
+            drp_den_reg <= {1'b0, drp_den_reg[1]};
+            drp_dwe_reg <= {1'b0, drp_dwe_reg[1]};
+          end
         end else begin
-          drp_den_reg <= {1'b0, drp_den_reg[1]};
-          drp_dwe_reg <= {1'b0, drp_dwe_reg[1]};
-        end
+          sysmone_temp <= temp_in;
+          state <= GET_TACHO;
+        end  
       end
 
       GET_TACHO : begin
@@ -487,11 +508,11 @@ always @(posedge up_clk)
             end
           end
         end
-        state <= DRP_READ_TEMP;
+        state <= DRP_WAIT_FSM_EN;
       end
 
       default :
-        state <= DRP_READ_TEMP;
+        state <= DRP_WAIT_FSM_EN;
     endcase
   end
 
@@ -537,7 +558,6 @@ always @(posedge up_clk) begin
     end 
     if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h40)) begin
       up_temp_00_h <= up_wdata_s;
-//      up_tacho_en <= 1'b0;
     end
     if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h41)) begin
       up_temp_25_l <= up_wdata_s;
@@ -671,5 +691,19 @@ always @(posedge up_clk) begin
     end
   end
 end
+
+//prescaler
+always @(posedge up_clk) begin
+  if (up_resetn  == 1'b0) begin
+    presc_reg <= 'h0;
+  end else begin
+    if (presc_reg == 32768) begin
+      presc_reg <= 'h0;
+    end else begin
+      presc_reg <= presc_reg + 1'b1;
+    end
+  end
+end
+
 
 endmodule
