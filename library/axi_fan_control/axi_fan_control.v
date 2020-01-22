@@ -37,9 +37,15 @@
 module axi_fan_control #(
   parameter     ID = 0,
   parameter     PWM_FREQUENCY_HZ  = 5000,
-  parameter     INTERNAL_SYSMONE  = 1,
+  parameter     INTERNAL_SYSMONE  = 0,
+  parameter     AVG_POW = 7, //do not exceede 7
 
   //temperature thresholds defined to match sysmon reg values
+  parameter     TACHO_TOL_PERCENT = 25,
+  parameter     TACHO_T25         = 1470000, // 14.7 ms
+  parameter     TACHO_T50         = 820000, // 8.2 ms
+  parameter     TACHO_T75         = 480000, // 4.8 ms
+  parameter     TACHO_T100        = 340000, // 3.4 ms
   parameter     TEMP_0    = 05, //TEMP_05
   parameter     TEMP_1    = 20, //TEMP_20
   parameter     TEMP_2    = 40, //TEMP_40
@@ -49,7 +55,7 @@ module axi_fan_control #(
   parameter     TEMP_6    = 90, //TEMP_90
   parameter     TEMP_7    = 95) ( //TEMP_95
 
-  input           [ 9:0]  temp_in,
+  input       [ 9:0]      temp_in,
   input                   tacho,
   output    reg           irq,
   output                  pwm,
@@ -85,9 +91,11 @@ localparam [31:0] CORE_MAGIC              = 32'h46414E43;    // FANC
 
 localparam        CLK_FREQUENCY           = 100000000;
 localparam        PWM_PERIOD              = CLK_FREQUENCY / PWM_FREQUENCY_HZ;
-localparam        OVERFLOW_LIM            = 200000;       
+localparam        OVERFLOW_LIM            = 200000;        
 //localparam        OVERFLOW_LIM            = CLK_FREQUENCY * 5;
-localparam        AVERAGE_DIV             = 128;
+//localparam        AVERAGE_DIV             = 16;
+
+localparam        AVERAGE_DIV             = 2**AVG_POW;
 
 localparam        THRESH_PWM_000          = (INTERNAL_SYSMONE == 1) ? (((TEMP_0+280.2308787)*65535)/509.3140064) : ((TEMP_0*41+11195)/20);
 localparam        THRESH_PWM_025_L        = (INTERNAL_SYSMONE == 1) ? (((TEMP_1+280.2308787)*65535)/509.3140064) : ((TEMP_1*41+11195)/20);
@@ -104,11 +112,6 @@ localparam        PWM_ONTIME_50           = PWM_PERIOD / 2;
 localparam        PWM_ONTIME_75           = PWM_PERIOD * 3 / 4;
 
 //tacho params
-localparam        TACHO_TOL_PERCENT       = 25;
-localparam        TACHO_T25               = 1470000; // 14.7 ms
-localparam        TACHO_T50               = 820000; // 8.2 ms
-localparam        TACHO_T75               = 480000; // 4.8 ms
-localparam        TACHO_T100              = 340000; // 3.4 ms
 localparam        TACHO_T25_TOL           = TACHO_T25 * TACHO_TOL_PERCENT / 100;
 localparam        TACHO_T50_TOL           = TACHO_T50 * TACHO_TOL_PERCENT / 100;
 localparam        TACHO_T75_TOL           = TACHO_T75 * TACHO_TOL_PERCENT / 100;
@@ -167,6 +170,15 @@ reg   [31:0]  up_temp_50_h  = THRESH_PWM_050_H;
 reg   [31:0]  up_temp_75_l  = THRESH_PWM_075_L;
 reg   [31:0]  up_temp_75_h  = THRESH_PWM_075_H;
 reg   [31:0]  up_temp_100_l = THRESH_PWM_100  ;
+
+reg   [31:0]  up_tacho_25 = TACHO_T25;
+reg   [31:0]  up_tacho_50 = TACHO_T50;
+reg   [31:0]  up_tacho_75 = TACHO_T75;
+reg   [31:0]  up_tacho_100 = TACHO_T100;
+reg   [31:0]  up_tacho_25_tol = TACHO_T25 * TACHO_TOL_PERCENT / 100;  
+reg   [31:0]  up_tacho_50_tol = TACHO_T50 * TACHO_TOL_PERCENT / 100;  
+reg   [31:0]  up_tacho_75_tol = TACHO_T75 * TACHO_TOL_PERCENT / 100;  
+reg   [31:0]  up_tacho_100_tol = TACHO_T100 * TACHO_TOL_PERCENT / 100; 
 
 reg           up_wack = 'd0;
 reg   [31:0]  up_rdata = 'd0;
@@ -346,7 +358,7 @@ always @(posedge up_clk)
             state <= DRP_WAIT_EOC;
           end
         end else begin
-          state <= DRP_READ_TEMP_WAIT_DRDY;
+          state <= DRP_READ_TEMP;
         end  
       end
 
@@ -375,19 +387,23 @@ always @(posedge up_clk)
       end
 
       DRP_WAIT_FSM_EN : begin
+        tacho_meas_int <= 1'b0;
+        tacho_alarm <= 1'b0;
+        pulse_gen_load_config <= 1'b0;
         if (presc_reg[15] == 1'b1) begin
           state <= DRP_READ_TEMP;
         end
       end
       
       DRP_READ_TEMP : begin
-        tacho_alarm <= 1'b0;
-        tacho_meas_int <= 1'b0;
-        pulse_gen_load_config <= 1'b0;
-        drp_daddr <= 8'h00;
-        // performing read
-        drp_den_reg <= 2'h2;
-        if (drp_eos == 1'b1) begin
+        if (INTERNAL_SYSMONE == 1) begin
+          drp_daddr <= 8'h00;
+          // performing read
+          drp_den_reg <= 2'h2;
+          if (drp_eos == 1'b1) begin
+            state <= DRP_READ_TEMP_WAIT_DRDY;
+          end
+        end else begin
           state <= DRP_READ_TEMP_WAIT_DRDY;
         end
       end
@@ -479,30 +495,30 @@ always @(posedge up_clk)
           //check rpm according to the current pwm duty cycle
           //tacho_alarm is only asserted for certain known pwm duty cycles and
           //for timeout
-          up_tacho_avg_sum <= tacho_avg_sum [31:7];
+          up_tacho_avg_sum <= tacho_avg_sum [AVG_POW + 24 : AVG_POW];
           tacho_meas_int <= 1'b1;
           if ((pwm_width == PWM_ONTIME_25) && (up_tacho_en == 0)) begin
-            if ((tacho_avg_sum [31:7] > TACHO_T25 + TACHO_T25_TOL) || (tacho_avg_sum [31:7] < TACHO_T25 - TACHO_T25_TOL)) begin
+            if ((tacho_avg_sum [AVG_POW + 24 : AVG_POW] > up_tacho_25 + up_tacho_25_tol) || (tacho_avg_sum [AVG_POW + 24 : AVG_POW] < up_tacho_25 - up_tacho_25_tol)) begin
               //the fan is turning but not as expected
               tacho_alarm <= 1'b1;
             end
           end else if ((pwm_width == PWM_ONTIME_50) && (up_tacho_en == 0)) begin
-            if ((tacho_avg_sum [31:7] > TACHO_T50 + TACHO_T50_TOL) || (tacho_avg_sum [31:7] < TACHO_T50 - TACHO_T50_TOL)) begin
+            if ((tacho_avg_sum [AVG_POW + 24 : AVG_POW] > up_tacho_50 + up_tacho_50_tol) || (tacho_avg_sum [AVG_POW + 24 : AVG_POW] < up_tacho_50 - up_tacho_50_tol)) begin
               //the fan is turning but not as expected
               tacho_alarm <= 1'b1;
             end
           end else if ((pwm_width == PWM_ONTIME_75) && (up_tacho_en == 0)) begin
-            if ((tacho_avg_sum [31:7] > TACHO_T75 + TACHO_T75_TOL) || (tacho_avg_sum [31:7] < TACHO_T75 - TACHO_T75_TOL)) begin
+            if ((tacho_avg_sum [AVG_POW + 24 : AVG_POW] > up_tacho_75 + up_tacho_75_tol) || (tacho_avg_sum [AVG_POW + 24 : AVG_POW] < up_tacho_75 - up_tacho_75_tol)) begin
               //the fan is turning but not as expected
               tacho_alarm <= 1'b1;
             end
           end else if ((pwm_width == PWM_PERIOD) && (up_tacho_en == 0)) begin
-            if ((tacho_avg_sum [31:7] > TACHO_T100 + TACHO_T100_TOL) || (tacho_avg_sum [31:7] < TACHO_T100 - TACHO_T100_TOL)) begin
+            if ((tacho_avg_sum [AVG_POW + 24 : AVG_POW] > up_tacho_100 + up_tacho_100_tol) || (tacho_avg_sum [AVG_POW + 24 : AVG_POW] < up_tacho_100 - up_tacho_100_tol)) begin
               //the fan is turning but not as expected
               tacho_alarm <= 1'b1;
             end
           end else if ((pwm_width == up_pwm_width) && up_tacho_en) begin
-            if ((tacho_avg_sum [31:7] > up_tacho_val + up_tacho_tol) || (tacho_avg_sum [31:7] < up_tacho_val - up_tacho_tol)) begin
+            if ((tacho_avg_sum [AVG_POW + 24 : AVG_POW] > up_tacho_val + up_tacho_tol) || (tacho_avg_sum [AVG_POW + 24 : AVG_POW] < up_tacho_val - up_tacho_tol)) begin
               //the fan is turning but not as expected
               tacho_alarm <= 1'b1;
             end
@@ -510,7 +526,6 @@ always @(posedge up_clk)
         end
         state <= DRP_WAIT_FSM_EN;
       end
-
       default :
         state <= DRP_WAIT_FSM_EN;
     endcase
@@ -533,8 +548,16 @@ always @(posedge up_clk) begin
     up_temp_75_l <= THRESH_PWM_075_L;
     up_temp_75_h <= THRESH_PWM_075_H;
     up_temp_100_l <= THRESH_PWM_100;
+    up_tacho_25 <= TACHO_T25;
+    up_tacho_50 <= TACHO_T50;
+    up_tacho_75 <= TACHO_T75;
+    up_tacho_100 <= TACHO_T100;
+    up_tacho_25_tol <= TACHO_T25 * TACHO_TOL_PERCENT / 100;  
+    up_tacho_50_tol <= TACHO_T50 * TACHO_TOL_PERCENT / 100;  
+    up_tacho_75_tol <= TACHO_T75 * TACHO_TOL_PERCENT / 100;  
+    up_tacho_100_tol <= TACHO_T100 * TACHO_TOL_PERCENT / 100; 
     up_irq_mask <= 4'b1111;
-    up_resetn <= 1'd0;
+    up_resetn <= 1'd1;
   end else begin
     up_wack <= up_wreq_s;
     if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h20)) begin
@@ -580,6 +603,30 @@ always @(posedge up_clk) begin
     if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h47)) begin
       up_temp_100_l <= up_wdata_s;
     end
+    if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h50)) begin
+      up_tacho_25 <= up_wdata_s;        
+    end
+    if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h51)) begin                              
+      up_tacho_50 <= up_wdata_s;     
+    end                             
+    if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h52)) begin                                 
+      up_tacho_75 <= up_wdata_s;  
+    end                                
+    if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h53)) begin                                    
+      up_tacho_100 <= up_wdata_s;  
+    end                              
+    if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h54)) begin                                  
+      up_tacho_25_tol <= up_wdata_s;  
+    end  
+    if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h55)) begin      
+      up_tacho_50_tol <= up_wdata_s;  
+    end  
+    if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h56)) begin      
+      up_tacho_75_tol <= up_wdata_s;  
+    end  
+    if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h57)) begin      
+      up_tacho_100_tol <= up_wdata_s;
+    end
     if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h10)) begin
       up_irq_mask <= up_wdata_s[3:0];
     end
@@ -617,6 +664,14 @@ always @(posedge up_clk) begin
         8'h45: up_rdata <= up_temp_75_l;
         8'h46: up_rdata <= up_temp_75_h;
         8'h47: up_rdata <= up_temp_100_l;
+        8'h50: up_rdata <= up_tacho_25;
+        8'h51: up_rdata <= up_tacho_50;
+        8'h52: up_rdata <= up_tacho_75;
+        8'h53: up_rdata <= up_tacho_100;
+        8'h54: up_rdata <= up_tacho_25_tol;
+        8'h55: up_rdata <= up_tacho_50_tol;
+        8'h56: up_rdata <= up_tacho_75_tol;
+        8'h57: up_rdata <= up_tacho_100_tol;       
         default: up_rdata <= 0;
       endcase
     end else begin
@@ -692,18 +747,16 @@ always @(posedge up_clk) begin
   end
 end
 
-//prescaler
+//prescaler; sets the rate at which the fsm is run
 always @(posedge up_clk) begin
   if (up_resetn  == 1'b0) begin
     presc_reg <= 'h0;
   end else begin
-    if (presc_reg == 32768) begin
+    if (presc_reg == 'h8000) begin
       presc_reg <= 'h0;
     end else begin
       presc_reg <= presc_reg + 1'b1;
     end
   end
 end
-
-
 endmodule
