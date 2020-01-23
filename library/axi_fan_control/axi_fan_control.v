@@ -46,20 +46,20 @@ module axi_fan_control #(
   parameter     TACHO_T50         = 820000, // 8.2 ms
   parameter     TACHO_T75         = 480000, // 4.8 ms
   parameter     TACHO_T100        = 340000, // 3.4 ms
-  parameter     TEMP_0    = 05, //TEMP_05
-  parameter     TEMP_1    = 20, //TEMP_20
-  parameter     TEMP_2    = 40, //TEMP_40
-  parameter     TEMP_3    = 60, //TEMP_60
-  parameter     TEMP_4    = 70, //TEMP_70
-  parameter     TEMP_5    = 80, //TEMP_80
-  parameter     TEMP_6    = 90, //TEMP_90
-  parameter     TEMP_7    = 95) ( //TEMP_95
+  parameter     TEMP_0    = 05,
+  parameter     TEMP_1    = 20,
+  parameter     TEMP_2    = 40,
+  parameter     TEMP_3    = 60,
+  parameter     TEMP_4    = 70,
+  parameter     TEMP_5    = 80,
+  parameter     TEMP_6    = 90,
+  parameter     TEMP_7    = 95)(
 
   input       [ 9:0]      temp_in,
   input                   tacho,
   output    reg           irq,
   output                  pwm,
-    
+
   //axi interface
   input                   s_axi_aclk,
   input                   s_axi_aresetn,
@@ -91,10 +91,7 @@ localparam [31:0] CORE_MAGIC              = 32'h46414E43;    // FANC
 
 localparam        CLK_FREQUENCY           = 100000000;
 localparam        PWM_PERIOD              = CLK_FREQUENCY / PWM_FREQUENCY_HZ;
-localparam        OVERFLOW_LIM            = 200000;        
-//localparam        OVERFLOW_LIM            = CLK_FREQUENCY * 5;
-//localparam        AVERAGE_DIV             = 16;
-
+localparam        OVERFLOW_LIM            = CLK_FREQUENCY * 5;
 localparam        AVERAGE_DIV             = 2**AVG_POW;
 
 localparam        THRESH_PWM_000          = (INTERNAL_SYSMONE == 1) ? (((TEMP_0+280.2308787)*65535)/509.3140064) : ((TEMP_0*41+11195)/20);
@@ -105,7 +102,7 @@ localparam        THRESH_PWM_050_H        = (INTERNAL_SYSMONE == 1) ? (((TEMP_4+
 localparam        THRESH_PWM_075_L        = (INTERNAL_SYSMONE == 1) ? (((TEMP_5+280.2308787)*65535)/509.3140064) : ((TEMP_5*41+11195)/20);
 localparam        THRESH_PWM_075_H        = (INTERNAL_SYSMONE == 1) ? (((TEMP_6+280.2308787)*65535)/509.3140064) : ((TEMP_6*41+11195)/20);
 localparam        THRESH_PWM_100          = (INTERNAL_SYSMONE == 1) ? (((TEMP_7+280.2308787)*65535)/509.3140064) : ((TEMP_7*41+11195)/20);
- 
+
 //pwm params
 localparam        PWM_ONTIME_25           = PWM_PERIOD / 4;
 localparam        PWM_ONTIME_50           = PWM_PERIOD / 2;
@@ -175,10 +172,10 @@ reg   [31:0]  up_tacho_25 = TACHO_T25;
 reg   [31:0]  up_tacho_50 = TACHO_T50;
 reg   [31:0]  up_tacho_75 = TACHO_T75;
 reg   [31:0]  up_tacho_100 = TACHO_T100;
-reg   [31:0]  up_tacho_25_tol = TACHO_T25 * TACHO_TOL_PERCENT / 100;  
-reg   [31:0]  up_tacho_50_tol = TACHO_T50 * TACHO_TOL_PERCENT / 100;  
-reg   [31:0]  up_tacho_75_tol = TACHO_T75 * TACHO_TOL_PERCENT / 100;  
-reg   [31:0]  up_tacho_100_tol = TACHO_T100 * TACHO_TOL_PERCENT / 100; 
+reg   [31:0]  up_tacho_25_tol = TACHO_T25 * TACHO_TOL_PERCENT / 100;
+reg   [31:0]  up_tacho_50_tol = TACHO_T50 * TACHO_TOL_PERCENT / 100;
+reg   [31:0]  up_tacho_75_tol = TACHO_T75 * TACHO_TOL_PERCENT / 100;
+reg   [31:0]  up_tacho_100_tol = TACHO_T100 * TACHO_TOL_PERCENT / 100;
 
 reg           up_wack = 'd0;
 reg   [31:0]  up_rdata = 'd0;
@@ -249,7 +246,7 @@ i_up_axi (
   .up_rdata (up_rdata),
   .up_rack (up_rack));
 
-generate 
+generate
 if (INTERNAL_SYSMONE == 1) begin
   SYSMONE4 #(
     .COMMON_N_SOURCE(16'hFFFF),
@@ -311,7 +308,7 @@ if (INTERNAL_SYSMONE == 1) begin
     .EOC(drp_eoc),
     .EOS(drp_eos)
   );
-end 
+end
 endgenerate
 
 //pulse generator instance
@@ -359,7 +356,7 @@ always @(posedge up_clk)
           end
         end else begin
           state <= DRP_READ_TEMP;
-        end  
+        end
       end
 
       DRP_WAIT_EOC : begin
@@ -394,7 +391,7 @@ always @(posedge up_clk)
           state <= DRP_READ_TEMP;
         end
       end
-      
+
       DRP_READ_TEMP : begin
         if (INTERNAL_SYSMONE == 1) begin
           drp_daddr <= 8'h00;
@@ -420,7 +417,7 @@ always @(posedge up_clk)
         end else begin
           sysmone_temp <= temp_in;
           state <= GET_TACHO;
-        end  
+        end
       end
 
       GET_TACHO : begin
@@ -443,7 +440,7 @@ always @(posedge up_clk)
       end
 
       EVAL_TEMP : begin
-         //pwm section
+        //pwm section
         //the pwm only has to be changed when passing through these temperature intervals
         if (sysmone_temp < up_temp_00_h) begin
           //PWM DUTY should be 0%
@@ -533,8 +530,7 @@ always @(posedge up_clk)
 
 //axi registers write
 always @(posedge up_clk) begin
-  if (s_axi_aresetn == 1'b0) begin
-    up_wack <= 'd0;
+  if (up_resetn == 1'b0) begin
     up_pwm_width <= 'd0;
     up_tacho_val <= 'd0;
     up_tacho_tol <= 'd0;
@@ -552,17 +548,12 @@ always @(posedge up_clk) begin
     up_tacho_50 <= TACHO_T50;
     up_tacho_75 <= TACHO_T75;
     up_tacho_100 <= TACHO_T100;
-    up_tacho_25_tol <= TACHO_T25 * TACHO_TOL_PERCENT / 100;  
-    up_tacho_50_tol <= TACHO_T50 * TACHO_TOL_PERCENT / 100;  
-    up_tacho_75_tol <= TACHO_T75 * TACHO_TOL_PERCENT / 100;  
-    up_tacho_100_tol <= TACHO_T100 * TACHO_TOL_PERCENT / 100; 
+    up_tacho_25_tol <= TACHO_T25 * TACHO_TOL_PERCENT / 100;
+    up_tacho_50_tol <= TACHO_T50 * TACHO_TOL_PERCENT / 100;
+    up_tacho_75_tol <= TACHO_T75 * TACHO_TOL_PERCENT / 100;
+    up_tacho_100_tol <= TACHO_T100 * TACHO_TOL_PERCENT / 100;
     up_irq_mask <= 4'b1111;
-    up_resetn <= 1'd1;
   end else begin
-    up_wack <= up_wreq_s;
-    if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h20)) begin
-      up_resetn <= up_wdata_s[0];
-    end
     if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h02)) begin
       up_scratch <= up_wdata_s;
     end
@@ -578,7 +569,7 @@ always @(posedge up_clk) begin
       up_tacho_en <= 1'b1;
     end else if (temp_increase_alarm) begin
       up_tacho_en <= 1'b0;
-    end 
+    end
     if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h40)) begin
       up_temp_00_h <= up_wdata_s;
     end
@@ -604,31 +595,44 @@ always @(posedge up_clk) begin
       up_temp_100_l <= up_wdata_s;
     end
     if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h50)) begin
-      up_tacho_25 <= up_wdata_s;        
+      up_tacho_25 <= up_wdata_s;
     end
-    if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h51)) begin                              
-      up_tacho_50 <= up_wdata_s;     
-    end                             
-    if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h52)) begin                                 
-      up_tacho_75 <= up_wdata_s;  
-    end                                
-    if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h53)) begin                                    
-      up_tacho_100 <= up_wdata_s;  
-    end                              
-    if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h54)) begin                                  
-      up_tacho_25_tol <= up_wdata_s;  
-    end  
-    if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h55)) begin      
-      up_tacho_50_tol <= up_wdata_s;  
-    end  
-    if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h56)) begin      
-      up_tacho_75_tol <= up_wdata_s;  
-    end  
-    if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h57)) begin      
+    if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h51)) begin
+      up_tacho_50 <= up_wdata_s;
+    end
+    if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h52)) begin
+      up_tacho_75 <= up_wdata_s;
+    end
+    if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h53)) begin
+      up_tacho_100 <= up_wdata_s;
+    end
+    if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h54)) begin
+      up_tacho_25_tol <= up_wdata_s;
+    end
+    if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h55)) begin
+      up_tacho_50_tol <= up_wdata_s;
+    end
+    if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h56)) begin
+      up_tacho_75_tol <= up_wdata_s;
+    end
+    if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h57)) begin
       up_tacho_100_tol <= up_wdata_s;
     end
     if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h10)) begin
       up_irq_mask <= up_wdata_s[3:0];
+    end
+  end
+end
+
+//writing reset
+always @(posedge up_clk) begin
+  if (s_axi_aresetn == 1'b0) begin
+    up_wack <= 'd0;
+    up_resetn <= 1'd1;
+  end else begin
+    up_wack <= up_wreq_s;
+    if ((up_wreq_s == 1'b1) && (up_waddr_s == 8'h20)) begin
+      up_resetn <= up_wdata_s[0];
     end
   end
 end
@@ -671,7 +675,7 @@ always @(posedge up_clk) begin
         8'h54: up_rdata <= up_tacho_25_tol;
         8'h55: up_rdata <= up_tacho_50_tol;
         8'h56: up_rdata <= up_tacho_75_tol;
-        8'h57: up_rdata <= up_tacho_100_tol;       
+        8'h57: up_rdata <= up_tacho_100_tol;
         default: up_rdata <= 0;
       endcase
     end else begin
