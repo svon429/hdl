@@ -46,14 +46,14 @@ module axi_fan_control #(
   parameter     TACHO_T50         = 820000, // 8.2 ms
   parameter     TACHO_T75         = 480000, // 4.8 ms
   parameter     TACHO_T100        = 340000, // 3.4 ms
-  parameter     TEMP_0    = 05,
-  parameter     TEMP_1    = 20,
-  parameter     TEMP_2    = 40,
-  parameter     TEMP_3    = 60,
-  parameter     TEMP_4    = 70,
-  parameter     TEMP_5    = 80,
-  parameter     TEMP_6    = 90,
-  parameter     TEMP_7    = 95)(
+  parameter     TEMP_00_H         = 05,
+  parameter     TEMP_25_L         = 20,
+  parameter     TEMP_25_H         = 40,
+  parameter     TEMP_50_L         = 60,
+  parameter     TEMP_50_H         = 70,
+  parameter     TEMP_75_L         = 80,
+  parameter     TEMP_75_H         = 90,
+  parameter     TEMP_00_L         = 95)(
 
   input       [ 9:0]      temp_in,
   input                   tacho,
@@ -94,14 +94,14 @@ localparam        PWM_PERIOD              = CLK_FREQUENCY / PWM_FREQUENCY_HZ;
 localparam        OVERFLOW_LIM            = CLK_FREQUENCY * 5;
 localparam        AVERAGE_DIV             = 2**AVG_POW;
 
-localparam        THRESH_PWM_000          = (INTERNAL_SYSMONE == 1) ? (((TEMP_0+280.2308787)*65535)/509.3140064) : ((TEMP_0*41+11195)/20);
-localparam        THRESH_PWM_025_L        = (INTERNAL_SYSMONE == 1) ? (((TEMP_1+280.2308787)*65535)/509.3140064) : ((TEMP_1*41+11195)/20);
-localparam        THRESH_PWM_025_H        = (INTERNAL_SYSMONE == 1) ? (((TEMP_2+280.2308787)*65535)/509.3140064) : ((TEMP_2*41+11195)/20);
-localparam        THRESH_PWM_050_L        = (INTERNAL_SYSMONE == 1) ? (((TEMP_3+280.2308787)*65535)/509.3140064) : ((TEMP_3*41+11195)/20);
-localparam        THRESH_PWM_050_H        = (INTERNAL_SYSMONE == 1) ? (((TEMP_4+280.2308787)*65535)/509.3140064) : ((TEMP_4*41+11195)/20);
-localparam        THRESH_PWM_075_L        = (INTERNAL_SYSMONE == 1) ? (((TEMP_5+280.2308787)*65535)/509.3140064) : ((TEMP_5*41+11195)/20);
-localparam        THRESH_PWM_075_H        = (INTERNAL_SYSMONE == 1) ? (((TEMP_6+280.2308787)*65535)/509.3140064) : ((TEMP_6*41+11195)/20);
-localparam        THRESH_PWM_100          = (INTERNAL_SYSMONE == 1) ? (((TEMP_7+280.2308787)*65535)/509.3140064) : ((TEMP_7*41+11195)/20);
+localparam        THRESH_PWM_000          = (INTERNAL_SYSMONE == 1) ? (((TEMP_00_H + 280.2308787) * 65535) / 509.3140064) : ((TEMP_00_H * 41 + 11195) / 20);
+localparam        THRESH_PWM_025_L        = (INTERNAL_SYSMONE == 1) ? (((TEMP_25_L + 280.2308787) * 65535) / 509.3140064) : ((TEMP_25_L * 41 + 11195) / 20);
+localparam        THRESH_PWM_025_H        = (INTERNAL_SYSMONE == 1) ? (((TEMP_25_H + 280.2308787) * 65535) / 509.3140064) : ((TEMP_25_H * 41 + 11195) / 20);
+localparam        THRESH_PWM_050_L        = (INTERNAL_SYSMONE == 1) ? (((TEMP_50_L + 280.2308787) * 65535) / 509.3140064) : ((TEMP_50_L * 41 + 11195) / 20);
+localparam        THRESH_PWM_050_H        = (INTERNAL_SYSMONE == 1) ? (((TEMP_50_H + 280.2308787) * 65535) / 509.3140064) : ((TEMP_50_H * 41 + 11195) / 20);
+localparam        THRESH_PWM_075_L        = (INTERNAL_SYSMONE == 1) ? (((TEMP_75_L + 280.2308787) * 65535) / 509.3140064) : ((TEMP_75_L * 41 + 11195) / 20);
+localparam        THRESH_PWM_075_H        = (INTERNAL_SYSMONE == 1) ? (((TEMP_75_H + 280.2308787) * 65535) / 509.3140064) : ((TEMP_75_H * 41 + 11195) / 20);
+localparam        THRESH_PWM_100          = (INTERNAL_SYSMONE == 1) ? (((TEMP_00_L + 280.2308787) * 65535) / 509.3140064) : ((TEMP_00_L * 41 + 11195) / 20);
 
 //pwm params
 localparam        PWM_ONTIME_25           = PWM_PERIOD / 4;
