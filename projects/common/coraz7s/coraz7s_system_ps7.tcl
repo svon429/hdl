@@ -1,10 +1,6 @@
 ad_ip_parameter sys_ps7 CONFIG.PCW_ACT_APU_PERIPHERAL_FREQMHZ {650.000000} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_ACT_CAN0_PERIPHERAL_FREQMHZ {23.8095} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_ACT_CAN1_PERIPHERAL_FREQMHZ {23.8095} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_ACT_CAN_PERIPHERAL_FREQMHZ {10.000000} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_ACT_DCI_PERIPHERAL_FREQMHZ {10.096154} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_ACT_ENET0_PERIPHERAL_FREQMHZ {125.000000} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_ACT_ENET1_PERIPHERAL_FREQMHZ {10.000000} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_ACT_FPGA0_PERIPHERAL_FREQMHZ {100.000000} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_ACT_FPGA1_PERIPHERAL_FREQMHZ {10.000000} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_ACT_FPGA2_PERIPHERAL_FREQMHZ {10.000000} 
@@ -30,27 +26,6 @@ ad_ip_parameter sys_ps7 CONFIG.PCW_ACT_WDT_PERIPHERAL_FREQMHZ {108.333336}
 ad_ip_parameter sys_ps7 CONFIG.PCW_APU_CLK_RATIO_ENABLE {6:2:1} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_APU_PERIPHERAL_FREQMHZ {650} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_ARMPLL_CTRL_FBDIV {26} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_CAN0_BASEADDR {0xE0008000} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_CAN0_CAN0_IO {<Select>} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_CAN0_GRP_CLK_ENABLE {0} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_CAN0_GRP_CLK_IO {<Select>} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_CAN0_HIGHADDR {0xE0008FFF} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_CAN0_PERIPHERAL_CLKSRC {External} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_CAN0_PERIPHERAL_ENABLE {0} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_CAN0_PERIPHERAL_FREQMHZ {-1} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_CAN1_BASEADDR {0xE0009000} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_CAN1_CAN1_IO {<Select>} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_CAN1_GRP_CLK_ENABLE {0} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_CAN1_GRP_CLK_IO {<Select>} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_CAN1_HIGHADDR {0xE0009FFF} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_CAN1_PERIPHERAL_CLKSRC {External} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_CAN1_PERIPHERAL_ENABLE {0} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_CAN1_PERIPHERAL_FREQMHZ {-1} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_CAN_PERIPHERAL_CLKSRC {IO PLL} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_CAN_PERIPHERAL_DIVISOR0 {1} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_CAN_PERIPHERAL_DIVISOR1 {1} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_CAN_PERIPHERAL_FREQMHZ {100} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_CAN_PERIPHERAL_VALID {0} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_CLK0_FREQ {100000000} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_CLK1_FREQ {10000000} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_CLK2_FREQ {10000000} 
@@ -93,36 +68,24 @@ ad_ip_parameter sys_ps7 CONFIG.PCW_DDR_WRITE_TO_CRITICAL_PRIORITY_LEVEL {2}
 ad_ip_parameter sys_ps7 CONFIG.PCW_DM_WIDTH {4} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_DQS_WIDTH {4} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_DQ_WIDTH {32} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_ENET0_BASEADDR {0xE000B000} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_ENET0_ENET0_IO {MIO 16 .. 27} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_ENET0_GRP_MDIO_ENABLE {1} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_ENET0_GRP_MDIO_IO {MIO 52 .. 53} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_ENET0_HIGHADDR {0xE000BFFF} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_ENET0_PERIPHERAL_CLKSRC {IO PLL} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_ENET0_PERIPHERAL_DIVISOR0 {8} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_ENET0_PERIPHERAL_DIVISOR1 {1} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_ENET0_PERIPHERAL_ENABLE {1} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_ENET0_PERIPHERAL_FREQMHZ {1000 Mbps} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_ENET0_RESET_ENABLE {1} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_ENET0_RESET_IO {MIO 9} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_ENET1_BASEADDR {0xE000C000} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_ENET1_ENET1_IO {<Select>} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_ENET1_GRP_MDIO_ENABLE {0} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_ENET1_GRP_MDIO_IO {<Select>} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_ENET1_HIGHADDR {0xE000CFFF} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_ENET1_PERIPHERAL_CLKSRC {IO PLL} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_ENET1_PERIPHERAL_DIVISOR0 {1} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_ENET1_PERIPHERAL_DIVISOR1 {1} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_ENET1_PERIPHERAL_ENABLE {0} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_ENET1_PERIPHERAL_FREQMHZ {1000 Mbps} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_ENET1_RESET_ENABLE {0} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_ENET1_RESET_IO {<Select>} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_ENET_RESET_ENABLE {1} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_ENET_RESET_POLARITY {Active Low} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_ENET_RESET_SELECT {Share reset pin} 
+ad_ip_parameter sys_ps7 CONFIG.PCW_GPIO_MIO_GPIO_ENABLE {1} 
+ad_ip_parameter sys_ps7 CONFIG.PCW_GPIO_MIO_GPIO_IO {MIO} 
+ad_ip_parameter sys_ps7 CONFIG.PCW_ACT_ENET0_PERIPHERAL_FREQMHZ {125.000000}  
+ad_ip_parameter sys_ps7 CONFIG.PCW_ENET0_PERIPHERAL_DIVISOR0 {8}  
+ad_ip_parameter sys_ps7 CONFIG.PCW_ENET0_PERIPHERAL_DIVISOR1 {1}  
+ad_ip_parameter sys_ps7 CONFIG.PCW_EN_ENET0 {1}  
+ad_ip_parameter sys_ps7 CONFIG.PCW_ENET0_PERIPHERAL_ENABLE {1}  
+ad_ip_parameter sys_ps7 CONFIG.PCW_ENET0_ENET0_IO {MIO 16 .. 27}  
+ad_ip_parameter sys_ps7 CONFIG.PCW_ENET0_GRP_MDIO_ENABLE {1}  
+ad_ip_parameter sys_ps7 CONFIG.PCW_ENET0_GRP_MDIO_IO {MIO 52 .. 53}  
+ad_ip_parameter sys_ps7 CONFIG.PCW_ENET_RESET_ENABLE {1}  
+ad_ip_parameter sys_ps7 CONFIG.PCW_ENET_RESET_SELECT {Share reset pin}  
+ad_ip_parameter sys_ps7 CONFIG.PCW_ENET0_RESET_ENABLE {1}  
+ad_ip_parameter sys_ps7 CONFIG.PCW_ENET0_RESET_IO {MIO 9}  
+ad_ip_parameter sys_ps7 CONFIG.PCW_ENET0_PERIPHERAL_FREQMHZ {1000 Mbps}  
+ad_ip_parameter sys_ps7 CONFIG.PCW_ENET0_PERIPHERAL_CLKSRC {IO PLL}  
+ad_ip_parameter sys_ps7 CONFIG.PCW_ENET_RESET_POLARITY {Active Low}  
 ad_ip_parameter sys_ps7 CONFIG.PCW_EN_4K_TIMER {0} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_EN_CAN0 {0} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_EN_CAN1 {0} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_EN_CLK0_PORT {1} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_EN_CLK1_PORT {1} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_EN_CLK2_PORT {0} 
@@ -132,12 +95,8 @@ ad_ip_parameter sys_ps7 CONFIG.PCW_EN_CLKTRIG1_PORT {0}
 ad_ip_parameter sys_ps7 CONFIG.PCW_EN_CLKTRIG2_PORT {0} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_EN_CLKTRIG3_PORT {0} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_EN_DDR {1} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_EN_EMIO_CAN0 {0} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_EN_EMIO_CAN1 {0} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_EN_EMIO_CD_SDIO0 {0} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_EN_EMIO_CD_SDIO1 {0} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_EN_EMIO_ENET0 {0} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_EN_EMIO_ENET1 {0} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_EN_EMIO_GPIO {0} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_EN_EMIO_I2C0 {1} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_EN_EMIO_I2C1 {0} 
@@ -157,16 +116,12 @@ ad_ip_parameter sys_ps7 CONFIG.PCW_EN_EMIO_UART1 {0}
 ad_ip_parameter sys_ps7 CONFIG.PCW_EN_EMIO_WDT {0} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_EN_EMIO_WP_SDIO0 {0} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_EN_EMIO_WP_SDIO1 {0} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_EN_ENET0 {1} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_EN_ENET1 {0} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_EN_GPIO {1} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_EN_I2C0 {1} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_EN_I2C1 {0} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_EN_MODEM_UART0 {0} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_EN_MODEM_UART1 {0} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_EN_PJTAG {0} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_EN_PTP_ENET0 {0} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_EN_PTP_ENET1 {0} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_EN_QSPI {0} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_EN_RST0_PORT {1} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_EN_RST1_PORT {1} 
@@ -228,8 +183,6 @@ ad_ip_parameter sys_ps7 CONFIG.PCW_GPIO_EMIO_GPIO_ENABLE {1}
 ad_ip_parameter sys_ps7 CONFIG.PCW_GPIO_EMIO_GPIO_IO {64} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_GPIO_EMIO_GPIO_WIDTH {64} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_GPIO_HIGHADDR {0xE000AFFF} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_GPIO_MIO_GPIO_ENABLE {1} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_GPIO_MIO_GPIO_IO {MIO} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_GPIO_PERIPHERAL_ENABLE {0} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_I2C0_BASEADDR {0xE0004000} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_I2C0_GRP_INT_ENABLE {1} 
@@ -319,9 +272,7 @@ ad_ip_parameter sys_ps7 CONFIG.PCW_NOR_SRAM_CS1_T_TR {1}
 ad_ip_parameter sys_ps7 CONFIG.PCW_NOR_SRAM_CS1_T_WC {11} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_NOR_SRAM_CS1_T_WP {1} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_NOR_SRAM_CS1_WE_TIME {0} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_OVERRIDE_BASIC_CLOCK {0} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_P2F_CAN0_INTR {0} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_P2F_CAN1_INTR {0} 
+ad_ip_parameter sys_ps7 CONFIG.PCW_OVERRIDE_BASIC_CLOCK {0}  
 ad_ip_parameter sys_ps7 CONFIG.PCW_P2F_CTI_INTR {0} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_P2F_DMAC0_INTR {0} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_P2F_DMAC1_INTR {0} 
@@ -332,8 +283,6 @@ ad_ip_parameter sys_ps7 CONFIG.PCW_P2F_DMAC5_INTR {0}
 ad_ip_parameter sys_ps7 CONFIG.PCW_P2F_DMAC6_INTR {0} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_P2F_DMAC7_INTR {0} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_P2F_DMAC_ABORT_INTR {0} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_P2F_ENET0_INTR {0} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_P2F_ENET1_INTR {0} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_P2F_GPIO_INTR {0} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_P2F_I2C0_INTR {0} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_P2F_I2C1_INTR {0} 
