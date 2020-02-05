@@ -25,54 +25,26 @@ ad_ip_parameter sys_ps7 CONFIG.PCW_ACT_USB1_PERIPHERAL_FREQMHZ {60}
 ad_ip_parameter sys_ps7 CONFIG.PCW_ACT_WDT_PERIPHERAL_FREQMHZ {108.333336} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_APU_CLK_RATIO_ENABLE {6:2:1} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_APU_PERIPHERAL_FREQMHZ {650} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_ARMPLL_CTRL_FBDIV {26} 
+ad_ip_parameter sys_ps7 CONFIG.PCW_PRESET_BANK0_VOLTAGE {LVCMOS 3.3V} 
+ad_ip_parameter sys_ps7 CONFIG.PCW_PRESET_BANK1_VOLTAGE {LVCMOS 1.8V} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_CLK0_FREQ {100000000} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_CLK1_FREQ {10000000} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_CLK2_FREQ {10000000} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_CLK3_FREQ {10000000} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_CORE0_FIQ_INTR {0} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_CORE0_IRQ_INTR {0} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_CORE1_FIQ_INTR {0} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_CORE1_IRQ_INTR {0} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_CPU_CPU_6X4X_MAX_RANGE {667} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_CPU_CPU_PLL_FREQMHZ {1300.000} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_CPU_PERIPHERAL_CLKSRC {ARM PLL} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_CPU_PERIPHERAL_DIVISOR0 {2} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_CRYSTAL_PERIPHERAL_FREQMHZ {50} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_DCI_PERIPHERAL_CLKSRC {DDR PLL} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_DCI_PERIPHERAL_DIVISOR0 {52} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_DCI_PERIPHERAL_DIVISOR1 {2} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_DCI_PERIPHERAL_FREQMHZ {10.159} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_DDRPLL_CTRL_FBDIV {21} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_DDR_DDR_PLL_FREQMHZ {1050.000} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_DDR_HPRLPR_QUEUE_PARTITION {HPR(0)/LPR(32)} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_DDR_HPR_TO_CRITICAL_PRIORITY_LEVEL {15} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_DDR_LPR_TO_CRITICAL_PRIORITY_LEVEL {2} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_DDR_PERIPHERAL_CLKSRC {DDR PLL} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_DDR_PERIPHERAL_DIVISOR0 {2} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_DDR_PORT0_HPR_ENABLE {0} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_DDR_PORT1_HPR_ENABLE {0} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_DDR_PORT2_HPR_ENABLE {0} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_DDR_PORT3_HPR_ENABLE {0} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_DDR_PRIORITY_READPORT_0 {<Select>} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_DDR_PRIORITY_READPORT_1 {<Select>} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_DDR_PRIORITY_READPORT_2 {<Select>} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_DDR_PRIORITY_READPORT_3 {<Select>} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_DDR_PRIORITY_WRITEPORT_0 {<Select>} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_DDR_PRIORITY_WRITEPORT_1 {<Select>} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_DDR_PRIORITY_WRITEPORT_2 {<Select>} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_DDR_PRIORITY_WRITEPORT_3 {<Select>} 
+ad_ip_parameter sys_ps7 CONFIG.PCW_DDR_PERIPHERAL_CLKSRC {DDR PLL}
 ad_ip_parameter sys_ps7 CONFIG.PCW_DDR_RAM_BASEADDR {0x00100000} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_DDR_RAM_HIGHADDR {0x1FFFFFFF} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_DDR_WRITE_TO_CRITICAL_PRIORITY_LEVEL {2} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_DM_WIDTH {4} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_DQS_WIDTH {4} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_DQ_WIDTH {32} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_GPIO_MIO_GPIO_ENABLE {1} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_GPIO_MIO_GPIO_IO {MIO} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_ACT_ENET0_PERIPHERAL_FREQMHZ {125.000000}  
-ad_ip_parameter sys_ps7 CONFIG.PCW_ENET0_PERIPHERAL_DIVISOR0 {8}  
-ad_ip_parameter sys_ps7 CONFIG.PCW_ENET0_PERIPHERAL_DIVISOR1 {1}  
 ad_ip_parameter sys_ps7 CONFIG.PCW_EN_ENET0 {1}  
 ad_ip_parameter sys_ps7 CONFIG.PCW_ENET0_PERIPHERAL_ENABLE {1}  
 ad_ip_parameter sys_ps7 CONFIG.PCW_ENET0_ENET0_IO {MIO 16 .. 27}  
@@ -141,37 +113,17 @@ ad_ip_parameter sys_ps7 CONFIG.PCW_EN_USB0 {1}
 ad_ip_parameter sys_ps7 CONFIG.PCW_EN_USB1 {0} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_EN_WDT {0} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_FCLK0_PERIPHERAL_CLKSRC {IO PLL} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_FCLK0_PERIPHERAL_DIVISOR0 {5} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_FCLK0_PERIPHERAL_DIVISOR1 {2} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_FCLK1_PERIPHERAL_CLKSRC {IO PLL} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_FCLK1_PERIPHERAL_DIVISOR0 {1} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_FCLK1_PERIPHERAL_DIVISOR1 {1} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_FCLK2_PERIPHERAL_CLKSRC {IO PLL} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_FCLK2_PERIPHERAL_DIVISOR0 {1} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_FCLK2_PERIPHERAL_DIVISOR1 {1} 
+ad_ip_parameter sys_ps7 CONFIG.PCW_FCLK2_PERIPHERAL_CLKSRC {IO PLL}  
 ad_ip_parameter sys_ps7 CONFIG.PCW_FCLK3_PERIPHERAL_CLKSRC {IO PLL} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_FCLK3_PERIPHERAL_DIVISOR0 {1} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_FCLK3_PERIPHERAL_DIVISOR1 {1} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_FCLK_CLK0_BUF {TRUE} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_FCLK_CLK1_BUF {FALSE} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_FCLK_CLK2_BUF {FALSE} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_FCLK_CLK3_BUF {FALSE} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_FPGA0_PERIPHERAL_FREQMHZ {100} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_FPGA1_PERIPHERAL_FREQMHZ {200} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_FPGA2_PERIPHERAL_FREQMHZ {120} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_FPGA3_PERIPHERAL_FREQMHZ {50} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_FPGA_FCLK0_ENABLE {1} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_FPGA_FCLK1_ENABLE {0} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_FPGA_FCLK2_ENABLE {0} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_FPGA_FCLK3_ENABLE {0} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_FTM_CTI_IN0 {<Select>} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_FTM_CTI_IN1 {<Select>} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_FTM_CTI_IN2 {<Select>} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_FTM_CTI_IN3 {<Select>} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_FTM_CTI_OUT0 {<Select>} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_FTM_CTI_OUT1 {<Select>} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_FTM_CTI_OUT2 {<Select>} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_FTM_CTI_OUT3 {<Select>} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_GP0_EN_MODIFIABLE_TXN {0} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_GP0_NUM_READ_THREADS {4} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_GP0_NUM_WRITE_THREADS {4} 
@@ -312,8 +264,6 @@ ad_ip_parameter sys_ps7 CONFIG.PCW_PERIPHERAL_BOARD_PRESET {None}
 ad_ip_parameter sys_ps7 CONFIG.PCW_PJTAG_PERIPHERAL_ENABLE {0} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_PJTAG_PJTAG_IO {<Select>} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_PLL_BYPASSMODE_ENABLE {0} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_PRESET_BANK0_VOLTAGE {LVCMOS 3.3V} 
-ad_ip_parameter sys_ps7 CONFIG.PCW_PRESET_BANK1_VOLTAGE {LVCMOS 1.8V} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_PS7_SI_REV {PRODUCTION} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_QSPI_GRP_FBCLK_ENABLE {0} 
 ad_ip_parameter sys_ps7 CONFIG.PCW_QSPI_GRP_FBCLK_IO {<Select>} 
