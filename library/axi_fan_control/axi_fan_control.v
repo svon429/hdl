@@ -657,6 +657,7 @@ always @(posedge up_clk) begin
         8'h21: up_rdata <= pwm_width;
         8'h22: up_rdata <= up_tacho_val;
         8'h23: up_rdata <= up_tacho_tol;
+        8'h24: up_rdata <= INTERNAL_SYSMONE;
         8'h30: up_rdata <= PWM_PERIOD;
         8'h31: up_rdata <= up_tacho_avg_sum;
         8'h32: up_rdata <= sysmone_temp;
